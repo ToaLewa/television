@@ -175,7 +175,6 @@ pub struct Cli {
     /// frequently and/or you want live udpates.
     #[arg(
         long,
-        default_value = "true",
         verbatim_doc_comment,
         conflicts_with = "no_preview",
         help_heading = "Preview"

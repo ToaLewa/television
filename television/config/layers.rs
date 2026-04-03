@@ -166,8 +166,11 @@ impl ConfigLayers {
                     None
                 },
             );
-        let channel_preview_cached = self.channel_cli.cache_preview
-            || self.channel.preview.as_ref().is_some_and(|p| p.cached);
+        let channel_preview_cached = if self.channel_cli.cache_preview {
+            true
+        } else {
+            self.channel.preview.as_ref().is_none_or(|p| p.cached)
+        };
 
         // Channel > base config fields
         let remote_show_channel_descriptions = self
@@ -671,4 +674,62 @@ pub struct MergedConfig {
     pub channel_frecency: bool,
     /// Whether the current channel reads from stdin directly
     pub is_stdin: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ConfigLayers;
+    use crate::{
+        channels::prototypes::{
+            ChannelPrototype, CommandSpec, PreviewSpec, Template,
+        },
+        cli::PostProcessedCli,
+        config::Config,
+    };
+
+    #[test]
+    fn test_channel_preview_cached_can_be_disabled_in_toml() {
+        let channel = ChannelPrototype::new("files", "fd -t f").with_preview(
+            Some(PreviewSpec {
+                command: CommandSpec::from_template(
+                    Template::parse("cat {}")
+                        .expect("preview template should parse"),
+                ),
+                offset: None,
+                cached: false,
+            }),
+        );
+
+        let merged = ConfigLayers::new(
+            Config::default(),
+            channel,
+            PostProcessedCli::default(),
+        )
+        .merge();
+
+        assert!(!merged.channel_preview_cached);
+    }
+
+    #[test]
+    fn test_channel_preview_cached_defaults_to_true_without_override() {
+        let channel = ChannelPrototype::new("files", "fd -t f").with_preview(
+            Some(PreviewSpec {
+                command: CommandSpec::from_template(
+                    Template::parse("cat {}")
+                        .expect("preview template should parse"),
+                ),
+                offset: None,
+                cached: true,
+            }),
+        );
+
+        let merged = ConfigLayers::new(
+            Config::default(),
+            channel,
+            PostProcessedCli::default(),
+        )
+        .merge();
+
+        assert!(merged.channel_preview_cached);
+    }
 }
