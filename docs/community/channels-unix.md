@@ -2183,6 +2183,95 @@ frecency = false
 
 ---
 
+### *nvim-config-files*
+
+Search through Neovim configuration files
+
+**Requirements:** `fd`, `nvim`
+
+**Code:** *nvim-config-files.toml*
+
+```toml
+[metadata]
+name = "nvim-config-files"
+description = "Search through Neovim configuration files"
+requirements = [ "fd", "nvim",]
+
+[source]
+command = [ "fd . ~/.config/nvim --type f",]
+display = "{regex_extract:.*\\.config/nvim/(.*):1}"
+
+[preview]
+command = "bat -n --color=always '{}'"
+
+[keybindings]
+enter = "actions:edit"
+
+[preview.env]
+BAT_THEME = "ansi"
+
+[actions.edit]
+description = "Opens the selected entries with the default editor (falls back to vim)"
+command = "${EDITOR:-vim} '{}'"
+shell = "bash"
+mode = "execute"
+
+```
+
+
+---
+
+### *opencode-sessions*
+
+Browse and resume OpenCode sessions
+
+![tv running the opencode-sessions channel](../../assets/channels/opencode-sessions.png)
+**Requirements:** `opencode`, `jq`
+
+**Code:** *opencode-sessions.toml*
+
+```toml
+[metadata]
+name = "opencode-sessions"
+description = "Browse and resume OpenCode sessions"
+requirements = [ "opencode", "jq",]
+
+[source]
+command = "opencode session list --format json | jq -r '.[] | \"\\(.id)\\t\\(.title)\\t\\(.directory)\"' "
+display = "{split:\t:1}  ({split:\t:2})"
+output = "{split:\t:0}"
+
+[preview]
+command = "opencode session list --format json | jq -r '.[] | select(.id == \"{split:\\t:0}\") | \"TITLE:     \\(.title)\\nID:        \\(.id)\\nPROJECT:   \\(.projectId)\\nDIRECTORY: \\(.directory)\\nUPDATED:   \\((.updated / 1000) | strftime(\"%Y-%m-%d %H:%M:%S\"))\"' "
+
+[ui]
+layout = "landscape"
+
+[keybindings]
+shortcut = "f4"
+enter = "actions:resume"
+ctrl-d = "actions:delete"
+
+[ui.preview_panel]
+size = 60
+header = "Session: {split:\t:1}"
+border_type = "rounded"
+
+[actions.resume]
+description = "Resume session"
+command = "opencode -s {split:\t:0}"
+mode = "execute"
+
+[actions.delete]
+description = "Delete session"
+command = "bash -c 'echo \"Delete {split:\\t:1}?\" && read -p \"[y/N]: \" conf && [[ $conf == \"y\" ]] && opencode session delete {split:\\t:0} ' "
+mode = "execute"
+
+```
+
+
+---
+
 ### *pacman-packages*
 
 List and manage installed pacman packages
