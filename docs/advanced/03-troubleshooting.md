@@ -183,7 +183,7 @@ Adjust channel triggers in config:
 ### Memory Usage
 
 1. **Limit source output**: try piping into `head -n N` in source command. Start with N=100.
-3. **Disable caching**: `--no-cache-preview`
+3. **Disable caching**: `--no-cache`
 
 ## Logs
 

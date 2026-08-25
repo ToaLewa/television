@@ -116,15 +116,19 @@ Preview:
           entry and its result is displayed below the preview panel.
 
       --cache-preview
-          Whether to cache the preview command output for each entry.
+          Force caching of the preview command output for each entry, regardless of channel
+          configuration.
           
-          This can be useful when the preview command is expensive to run
-          and you want to avoid running it multiple times for the same entry.
+          Preview caching is enabled by default (and can be configured per-channel via the
+          `cached` field on the `[preview]` section), so this flag is mostly useful to override
+          a channel that disables caching.
+
+      --no-cache
+          Disable caching of the preview command output for each entry, regardless of channel
+          configuration.
           
-          This is enabled by default since most channels will benefit from it.
-          
-          This can be disabled for special cases e.g. where the preview command output changes
-          frequently and/or you want live udpates.
+          Can be paired with --hide-preview, e.g. to keep a live-updating preview computed
+          in the background without ever caching stale results.
 
       --preview-offset <STRING>
           A preview line number offset template to use to scroll the preview to for each

@@ -166,8 +166,13 @@ impl ConfigLayers {
                     None
                 },
             );
-        let channel_preview_cached = self.channel_cli.cache_preview
-            || self.channel.preview.as_ref().is_some_and(|p| p.cached);
+        let channel_preview_cached = if self.channel_cli.cache_preview {
+            true
+        } else if self.channel_cli.no_cache {
+            false
+        } else {
+            self.channel.preview.as_ref().is_some_and(|p| p.cached)
+        };
 
         // Channel > base config fields
         let remote_show_channel_descriptions = self
